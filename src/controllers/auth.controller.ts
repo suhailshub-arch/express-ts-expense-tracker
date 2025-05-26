@@ -12,10 +12,7 @@ export const registerUser = async (
     console.log("Register route hit with email:", email);
 
     const createUserResp = await createUser({ email, password });
-    // if (!createUserResp) {
-    //   res.status(400).json({ message: "User creation failed" });
-    //   return next();
-    // }
+
     res.status(201).json({
       message: "User registered successfully",
       sucess: true,

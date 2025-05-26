@@ -1,5 +1,4 @@
-import { UserModel } from "../models/User.model.js";
-import { IUser } from "../models/User.model.js";
+import { UserModel, IUser } from "../models/User.model.js";
 import { hash, compare } from "bcrypt";
 import {
   BCRYPT_SALT_ROUNDS,
@@ -47,12 +46,11 @@ export async function loginUser({
   email,
   password,
 }: LoginDTO): Promise<{ user: Pick<IUser, "_id" | "email">; token: string }> {
-
   const user = await UserModel.findOne({ email }).exec();
 
   // Always perform a compare(), even if user is null
   //    so timing is consistent.
-  const hashToCompare = user ? user.passwordHash : DUMMY_PASSWORD_HASH; 
+  const hashToCompare = user ? user.passwordHash : DUMMY_PASSWORD_HASH;
 
   const passwordValid = await compare(password, hashToCompare);
 
