@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { createUser } from "../services/auth.service.js";
+import { createUser, loginUser } from "../services/auth.service.js";
+import { AppError } from "../types/error.js";
 
 export const registerUser = async (
   req: Request,
@@ -11,27 +12,52 @@ export const registerUser = async (
     console.log("Register route hit with email:", email);
 
     const createUserResp = await createUser({ email, password });
-    if (!createUserResp) {
-      res.status(400).json({ message: "User creation failed" });
-      return next();
-    }
+    // if (!createUserResp) {
+    //   res.status(400).json({ message: "User creation failed" });
+    //   return next();
+    // }
     res.status(201).json({
       message: "User registered successfully",
       sucess: true,
       user: createUserResp,
     });
     return next();
-  } catch (error) {
-    console.error("Error in register route:", error);
-    res.status(500).json({ message: "Internal server error" });
-    return next(error);
+  } catch (err: unknown) {
+    let status = 500;
+    let message = 'Internal server error';
+
+    if (err instanceof Error) {
+      message = err.message;
+      if ((err as AppError).status && typeof (err as AppError).status === 'number') {
+        status = (err as AppError).status!;
+      }
+    }
+
+    res.status(status).json({ success: false, message });
   }
 };
 
-export const loginUser = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  console.log("Login route hit");
+export const login = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email, password } = req.body;
+    const { user, token } = await loginUser({ email, password });
+
+    res.status(200).json({
+      success: true,
+      message: 'User logged in',
+      data: { user, token },
+    });
+  } catch (err: unknown) {
+    let status = 500;
+    let message = 'Internal server error';
+
+    if (err instanceof Error) {
+      message = err.message;
+      if ((err as AppError).status && typeof (err as AppError).status === 'number') {
+        status = (err as AppError).status!;
+      }
+    }
+
+    res.status(status).json({ success: false, message });
+  }
 };
