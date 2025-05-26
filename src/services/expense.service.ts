@@ -38,3 +38,27 @@ export async function fetchExpenses(params: {
     throw err;
   }
 }
+
+export async function deleteExpense(params: {
+  userId: string;
+  expenseId: string;
+}): Promise<Boolean> {
+  console.log("deleteExpense service called with params:", params);
+  const { userId, expenseId } = params;
+  try {
+    const isDeleteed = await ExpenseModel.deleteOne({
+      _id: expenseId,
+      user: userId,
+    });
+    if (isDeleteed.deletedCount === 0) {
+      const err = new Error("Expense not found or already deleted");
+      (err as AppError).status = 404;
+      throw err;
+    }
+    return isDeleteed.acknowledged;
+  } catch (error) {
+    const err = new Error("Error deleting expense");
+    (err as AppError).status = 500;
+    throw err;
+  }
+}

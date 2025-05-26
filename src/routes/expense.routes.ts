@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { getAllExpenses, getExpenseById } from "../controllers/expense.controller.js";
+import {
+  getAllExpenses,
+  getExpenseById,
+  deleteExpenseById,
+} from "../controllers/expense.controller.js";
 
 const expenseRouter = Router();
 
@@ -9,8 +13,8 @@ expenseRouter.post("/", () => {});
 
 expenseRouter.get("/:expenseId", getExpenseById);
 
-expenseRouter.put("/:id", () => {});
+expenseRouter.put("/:iexpenseIdd", () => {});
 
-expenseRouter.delete("/:id", () => {});
+expenseRouter.delete("/:expenseId", deleteExpenseById);
 
 export default expenseRouter;
