@@ -8,6 +8,7 @@ import {
 } from "../services/expense.service.js";
 import { Category } from "../models/Expense.model.js";
 import { RequestHandler } from "express";
+import { ParsedQs } from "qs";
 
 export interface CreateExpenseDTO {
   amount: number;
@@ -16,14 +17,30 @@ export interface CreateExpenseDTO {
   notes?: string;
 }
 
-export const getAllExpenses = async (
+interface ListQuery extends ParsedQs {
+  start?: string;
+  end?: string;
+  period?: "past_week" | "last_month" | "last_3_months";
+}
+
+function getQueryString(value: unknown): string | undefined {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value) && typeof value[0] === "string") return value[0];
+  return undefined;
+}
+
+export const getAllExpenses: RequestHandler<{}, {}, {}, ListQuery> = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
     const { id } = req.user!; // request.user is defined by the validateJWT middleware
-    const allExpenses = await fetchExpenses({ userId: id });
+    const start = getQueryString(req.query.start);
+    const end = getQueryString(req.query.end);
+    const period = getQueryString(req.query.period) as ListQuery["period"];
+    console.log(period);
+    const allExpenses = await fetchExpenses({ userId: id, start, end, period });
     if (!allExpenses) {
       const err = new Error("No expenses found for this user");
       (err as AppError).status = 404;

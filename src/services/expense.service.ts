@@ -21,8 +21,11 @@ interface updateExpenseParams {
 export async function fetchExpenses(params: {
   userId: string;
   expenseId?: string;
+  start?: string;
+  end?: string;
+  period?: "past_week" | "last_month" | "last_3_months";
 }): Promise<IExpense[] | IExpense | null> {
-  const { userId, expenseId } = params;
+  const { userId, expenseId, start, end, period } = params;
   try {
     if (expenseId) {
       const expense = await ExpenseModel.findOne({
@@ -36,7 +39,35 @@ export async function fetchExpenses(params: {
       }
       return expense;
     } else {
-      const expenses = await ExpenseModel.find({ user: userId })
+      const filter: Record<string, any> = { user: userId };
+      if (start || end) {
+        filter.date = {};
+        if (start) {
+          filter.date.$gte = new Date(start);
+        }
+        if (end) {
+          filter.date.$lte = new Date(end);
+        }
+      } else if (period) {
+        const now = new Date();
+        let startDate: Date;
+
+        switch (period) {
+          case "past_week":
+            startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            break;
+
+          case "last_month":
+            startDate = new Date(now);
+            startDate.setMonth(now.getMonth() - 1);
+
+          case "last_3_months":
+            startDate = new Date(now);
+            startDate.setMonth(now.getMonth() - 3);
+        }
+        filter.date = { $gte: startDate, $lte: now };
+      }
+      const expenses = await ExpenseModel.find(filter)
         .sort({
           date: -1,
         })
