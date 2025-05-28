@@ -4,6 +4,7 @@ import {
   getExpenseById,
   deleteExpenseById,
   createExpense,
+  updateExpensebyId,
 } from "../controllers/expense.controller.js";
 
 const expenseRouter = Router();
@@ -14,7 +15,7 @@ expenseRouter.post("/", createExpense);
 
 expenseRouter.get("/:expenseId", getExpenseById);
 
-expenseRouter.put("/:expenseId", () => {});
+expenseRouter.put("/:expenseId", updateExpensebyId);
 
 expenseRouter.delete("/:expenseId", deleteExpenseById);
 

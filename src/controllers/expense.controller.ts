@@ -4,6 +4,7 @@ import {
   fetchExpenses,
   deleteExpense,
   insertExpense,
+  updateExpense,
 } from "../services/expense.service.js";
 import { Category } from "../models/Expense.model.js";
 import { RequestHandler } from "express";
@@ -155,5 +156,47 @@ export const createExpense: RequestHandler<{}, {}, CreateExpenseDTO> = async (
       }
     }
     res.status(status).json({ success: false, message });
+  }
+};
+
+export const updateExpensebyId: RequestHandler<
+  {},
+  {},
+  Partial<CreateExpenseDTO>
+> = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.user!;
+    const { expenseId } = req.params;
+    const updated = await updateExpense({
+      user: id,
+      ...req.body,
+      expenseId,
+    });
+    if (updated === true) {
+      res.status(204).json({
+        success: true,
+      });
+    } else {
+      const err = new Error("Error updating expense");
+      (err as AppError).status = 500;
+      throw err;
+    }
+  } catch (err: unknown) {
+    let message = "Internal server error";
+    let status = 500;
+
+    if (err instanceof Error) {
+      message = err.message;
+      if (
+        (err as AppError).status &&
+        typeof (err as AppError).status === "number"
+      ) {
+        status = (err as AppError).status!;
+      }
+    }
+    res.status(status).json({
+      success: false,
+      message,
+    });
   }
 };

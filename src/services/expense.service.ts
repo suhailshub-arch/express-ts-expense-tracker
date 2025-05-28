@@ -9,6 +9,15 @@ interface InsertExpenseParams {
   notes?: string;
 }
 
+interface updateExpenseParams {
+  user: string;
+  amount?: number;
+  category?: Category;
+  date?: Date;
+  notes?: string;
+  expenseId: string;
+}
+
 export async function fetchExpenses(params: {
   userId: string;
   expenseId?: string;
@@ -89,6 +98,30 @@ export async function insertExpense(
     return inserted;
   } catch (error) {
     const err = new Error("Error inserting expense");
+    (err as AppError).status = 500;
+    throw err;
+  }
+}
+
+export async function updateExpense(
+  params: updateExpenseParams
+): Promise<boolean> {
+  try {
+    const upadted = await ExpenseModel.updateOne(
+      {
+        user: params.user,
+        _id: params.expenseId,
+      },
+      {
+        ...(params.amount !== undefined && { amount: params.amount }),
+        ...(params.category !== undefined && { category: params.category }),
+        ...(params.notes !== undefined && { notes: params.notes }),
+        ...(params.date !== undefined && { date: params.date }),
+      }
+    );
+    return upadted.acknowledged;
+  } catch (error) {
+    const err = new Error("Error updating expense");
     (err as AppError).status = 500;
     throw err;
   }
