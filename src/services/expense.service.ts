@@ -1,5 +1,13 @@
-import { ExpenseModel, IExpense } from "../models/Expense.model.js";
+import { Category, ExpenseModel, IExpense } from "../models/Expense.model.js";
 import { AppError } from "../types/error.js";
+
+interface InsertExpenseParams {
+  user: string;
+  amount: number;
+  category: Category;
+  date: Date;
+  notes?: string;
+}
 
 export async function fetchExpenses(params: {
   userId: string;
@@ -43,7 +51,6 @@ export async function deleteExpense(params: {
   userId: string;
   expenseId: string;
 }): Promise<Boolean> {
-  console.log("deleteExpense service called with params:", params);
   const { userId, expenseId } = params;
   try {
     const isDeleteed = await ExpenseModel.deleteOne({
@@ -58,6 +65,30 @@ export async function deleteExpense(params: {
     return isDeleteed.acknowledged;
   } catch (error) {
     const err = new Error("Error deleting expense");
+    (err as AppError).status = 500;
+    throw err;
+  }
+}
+
+export async function insertExpense(
+  params: InsertExpenseParams
+): Promise<IExpense> {
+  try {
+    const inserted = await ExpenseModel.create({
+      user: params.user,
+      amount: params.amount,
+      category: params.category,
+      date: params.date,
+      notes: params.notes,
+    });
+    if (!inserted) {
+      const err = new Error("Error inserting expense");
+      (err as AppError).status = 500;
+      throw err;
+    }
+    return inserted;
+  } catch (error) {
+    const err = new Error("Error inserting expense");
     (err as AppError).status = 500;
     throw err;
   }

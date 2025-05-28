@@ -3,17 +3,18 @@ import {
   getAllExpenses,
   getExpenseById,
   deleteExpenseById,
+  createExpense,
 } from "../controllers/expense.controller.js";
 
 const expenseRouter = Router();
 
 expenseRouter.get("/", getAllExpenses);
 
-expenseRouter.post("/", () => {});
+expenseRouter.post("/", createExpense);
 
 expenseRouter.get("/:expenseId", getExpenseById);
 
-expenseRouter.put("/:iexpenseIdd", () => {});
+expenseRouter.put("/:expenseId", () => {});
 
 expenseRouter.delete("/:expenseId", deleteExpenseById);
 

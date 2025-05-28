@@ -1,6 +1,19 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../types/error.js";
-import { fetchExpenses, deleteExpense } from "../services/expense.service.js";
+import {
+  fetchExpenses,
+  deleteExpense,
+  insertExpense,
+} from "../services/expense.service.js";
+import { Category } from "../models/Expense.model.js";
+import { RequestHandler } from "express";
+
+export interface CreateExpenseDTO {
+  amount: number;
+  category: Category;
+  date: string; //ISO UTC timestamp
+  notes?: string;
+}
 
 export const getAllExpenses = async (
   req: Request,
@@ -76,10 +89,8 @@ export const deleteExpenseById = async (
   next: NextFunction
 ) => {
   try {
-    console.log("deleteExpenseById route hit");
     const { id } = req.user!; // request.user is defined by the validateJWT middleware
     const { expenseId } = req.params;
-    console.log("User ID:", id, "Expense ID:", expenseId);
     const isExpenseDeleted = await deleteExpense({ userId: id, expenseId });
     if (!isExpenseDeleted) {
       const err = new Error("Expense not found");
@@ -106,5 +117,43 @@ export const deleteExpenseById = async (
       success: false,
       message,
     });
+  }
+};
+
+export const createExpense: RequestHandler<{}, {}, CreateExpenseDTO> = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.user!; // request.user is defined by the validateJWT middleware
+    const { amount, category, date, notes } = req.body;
+
+    const newExpense = await insertExpense({
+      user: id,
+      amount,
+      category,
+      date: new Date(date),
+      notes,
+    });
+    res.status(201).json({
+      success: true,
+      message: "Expense created successfully",
+      data: newExpense,
+    });
+  } catch (err: unknown) {
+    let status = 500;
+    let message = "Internal server error";
+
+    if (err instanceof Error) {
+      message = err.message;
+      if (
+        (err as AppError).status &&
+        typeof (err as AppError).status === "number"
+      ) {
+        status = (err as AppError).status!;
+      }
+    }
+    res.status(status).json({ success: false, message });
   }
 };

@@ -14,9 +14,9 @@ export interface IExpense extends Document {
   amount: number;
   category: Category;
   notes?: string;
-  date: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  date?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const expenseSchema = new Schema<IExpense>(
