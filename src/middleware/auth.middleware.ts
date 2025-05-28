@@ -25,7 +25,6 @@ export const validateJWT = (
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
-    console.log("Decoded JWT:", decoded);
     req.user = decoded.user; 
     next();
   } catch (error) {

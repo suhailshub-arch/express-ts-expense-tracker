@@ -39,7 +39,6 @@ export const getAllExpenses: RequestHandler<{}, {}, {}, ListQuery> = async (
     const start = getQueryString(req.query.start);
     const end = getQueryString(req.query.end);
     const period = getQueryString(req.query.period) as ListQuery["period"];
-    console.log(period);
     const allExpenses = await fetchExpenses({ userId: id, start, end, period });
     if (!allExpenses) {
       const err = new Error("No expenses found for this user");
@@ -74,7 +73,6 @@ export const getExpenseById = async (
   next: NextFunction
 ) => {
   try {
-    console.log("getExpenseById route hit");
     const { id } = req.user!; // request.user is defined by the validateJWT middleware
     const { expenseId } = req.params;
 

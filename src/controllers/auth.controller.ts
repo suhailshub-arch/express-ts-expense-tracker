@@ -9,7 +9,6 @@ export const registerUser = async (
 ) => {
   try {
     const { email, password } = req.body;
-    console.log("Register route hit with email:", email);
 
     const createUserResp = await createUser({ email, password });
 
